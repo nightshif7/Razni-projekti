@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:www.scribd.com)",
+      "Bash(npx vite:*)"
+    ]
+  }
+}
