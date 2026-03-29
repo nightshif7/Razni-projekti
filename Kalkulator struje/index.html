@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kalkulator struje</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>⚡ Kalkulator računa za struju</h1>
+    <div class="hep-logo-wrap">
+      <img src="hep-logo.jpg" alt="HEP logo" class="hep-logo" />
+    </div>
+
+    <div class="card">
+      <h2>⚙️ Odabir tarifnog modela</h2>
+      <div class="input-group">
+        <label>Tarifni model</label>
+        <select id="tarifa_model" onchange="promijeniTarifu()">
+          <option value="bijeli">🔵 Bijeli model – dvotarifni (RVT + RNT)</option>
+          <option value="plavi">🔵 Plavi model – jednotarifni (ET)</option>
+        </select>
+      </div>
+      <div id="upozorenje" class="upozorenje" style="display:none"></div>
+    </div>
+
+    <div class="card">
+      <h2>📟 Očitanja brojila</h2>
+
+      <!-- Bijeli model - dvotarifni -->
+      <div id="blok_dvotarifni">
+        <div class="grid">
+          <div class="input-group">
+            <label>RVT (R1 – visoka tarifa) – staro stanje</label>
+            <input type="number" id="rvt_od" placeholder="npr. 79207" />
+          </div>
+          <div class="input-group">
+            <label>RVT (R1 – visoka tarifa) – novo stanje</label>
+            <input type="number" id="rvt_do" placeholder="npr. 79840" />
+          </div>
+          <div class="input-group">
+            <label>RNT (R2 – niska tarifa) – staro stanje</label>
+            <input type="number" id="rnt_od" placeholder="npr. 58164" />
+          </div>
+          <div class="input-group">
+            <label>RNT (R2 – niska tarifa) – novo stanje</label>
+            <input type="number" id="rnt_do" placeholder="npr. 58730" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Plavi model - jednotarifni -->
+      <div id="blok_jednotarifni" style="display:none">
+        <div class="grid">
+          <div class="input-group">
+            <label>ET (jedinstvena tarifa) – staro stanje</label>
+            <input type="number" id="et_od" placeholder="npr. 12500" />
+          </div>
+          <div class="input-group">
+            <label>ET (jedinstvena tarifa) – novo stanje</label>
+            <input type="number" id="et_do" placeholder="npr. 13100" />
+          </div>
+        </div>
+      </div>
+
+      <button onclick="izracunaj()">🔢 Izračunaj</button>
+    </div>
+
+    <div class="card result-card" id="result" style="display:none">
+      <h2>📋 Detaljan obračun</h2>
+      <p id="r_godisnje" class="godisnje-info"></p>
+
+      <div class="section">
+        <h3>Potrošnja</h3>
+        <table>
+          <tr class="row-dvotarifni"><td>RVT potrošak</td><td id="r_rvt_kwh">—</td><td>kWh</td></tr>
+          <tr class="row-dvotarifni"><td>RNT potrošak</td><td id="r_rnt_kwh">—</td><td>kWh</td></tr>
+          <tr class="row-jednotarifni" style="display:none"><td>ET potrošak</td><td id="r_et_kwh">—</td><td>kWh</td></tr>
+          <tr class="total-row"><td><strong>Ukupno</strong></td><td id="r_ukupno_kwh">—</td><td>kWh</td></tr>
+        </table>
+      </div>
+
+      <div class="section">
+        <h3>🔌 Distribucija</h3>
+        <table>
+          <tr class="row-dvotarifni"><td>RVT</td><td id="r_dist_rvt">—</td><td>EUR</td></tr>
+          <tr class="row-dvotarifni"><td>RNT</td><td id="r_dist_rnt">—</td><td>EUR</td></tr>
+          <tr class="row-jednotarifni" style="display:none"><td>ET</td><td id="r_dist_et">—</td><td>EUR</td></tr>
+          <tr><td>Naknada za OMM (fiksno)</td><td id="r_dist_omm">—</td><td>EUR</td></tr>
+          <tr class="subtotal-row"><td><strong>Distribucija ukupno</strong></td><td id="r_dist_uk">—</td><td>EUR</td></tr>
+        </table>
+      </div>
+
+      <div class="section">
+        <h3>🔄 Prijenos</h3>
+        <table>
+          <tr class="row-dvotarifni"><td>RVT</td><td id="r_prij_rvt">—</td><td>EUR</td></tr>
+          <tr class="row-dvotarifni"><td>RNT</td><td id="r_prij_rnt">—</td><td>EUR</td></tr>
+          <tr class="row-jednotarifni" style="display:none"><td>ET</td><td id="r_prij_et">—</td><td>EUR</td></tr>
+          <tr class="subtotal-row"><td><strong>Prijenos ukupno</strong></td><td id="r_prij_uk">—</td><td>EUR</td></tr>
+        </table>
+      </div>
+
+      <div class="section">
+        <h3>🏪 Opskrba</h3>
+        <table>
+          <tr class="row-dvotarifni"><td>RVT</td><td id="r_ops_rvt">—</td><td>EUR</td></tr>
+          <tr class="row-dvotarifni"><td>RNT</td><td id="r_ops_rnt">—</td><td>EUR</td></tr>
+          <tr class="row-jednotarifni" style="display:none"><td>ET</td><td id="r_ops_et">—</td><td>EUR</td></tr>
+          <tr><td>Naknada za opskrbu (fiksno)</td><td id="r_ops_nak">—</td><td>EUR</td></tr>
+          <tr class="subtotal-row"><td><strong>Opskrba ukupno</strong></td><td id="r_ops_uk">—</td><td>EUR</td></tr>
+        </table>
+      </div>
+
+      <div class="section">
+        <h3>🌱 Naknade</h3>
+        <table>
+          <tr><td>Naknada za OIE (obnovljivi izvori)</td><td id="r_oie">—</td><td>EUR</td></tr>
+          <tr><td>Solidarna naknada</td><td id="r_solid">—</td><td>EUR</td></tr>
+          <tr><td>Popust za solidarnu naknadu</td><td id="r_popust">—</td><td>EUR</td></tr>
+        </table>
+      </div>
+
+      <div class="section total-section">
+        <table>
+          <tr><td><strong>Ukupno bez PDV-a</strong></td><td id="r_bez_pdv">—</td><td>EUR</td></tr>
+          <tr><td>PDV (25%)</td><td id="r_pdv">—</td><td>EUR</td></tr>
+          <tr class="grand-total"><td><strong>💰 UKUPNO ZA PLATITI</strong></td><td id="r_total">—</td><td>EUR</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
